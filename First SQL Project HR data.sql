@@ -1,16 +1,15 @@
---Insights: Most promoted empoyees have been with the company for under 5 years. The female-male split of promoted employees is proportional to the split for the company, suggesting a lack of gender bias in promotions. Almost all promoted employees have a bachelor's degree or above, but some departments, like Technology, do promote employees with below secondary educations. Sourcing is the most common recruitment method for promoted employees. 
+--Insights: Most promoted empoyees have been with the company for under 5 years. The female-male split of promoted employees is proportional to the split for the company, suggesting a lack of gender bias in promotions. Almost all promoted employees have a bachelor's degree or above, but some departments, like Technology, do promote employees with below secondary educations. Sourcing is the most common recruitment method for promoted employees. High ratings are not the most helpful indicator of promototability. 
 --Goal: Explore characteristics of the company's best employees. 
 
---Today, I am conducting exploratory analysis on a Kaggle employee dataset. Credit to Möbius: https://www.kaggle.com/datasets/arashnic/hr-ana
---The dataset description says this is originally for a Phython prediction model exercise. I wanted to explore the dataset as is. Let's get started. 
+--Today, I am conducting exploratory analysis on a Kaggle employee dataset. Credit to MÃ¶bius: https://www.kaggle.com/datasets/arashnic/hr-ana
 
 SELECT *
 FROM [Employee Data]
 
---Information about gender, department, trainings completed, and more. The most important column is "is_promoted". This indicates someone who will be promoted. 
+--Information about gender, department, trainings completed, and more. The binary column is "is_promoted" indicates someone who will be promoted. 
 
--- I will separate my questions into two groups: just employees already slated for promotion, then all employees. 
--- I want to learn about the company's top employees, and then the company as a whole. Looking at the overall company can identify gaps in recognition or capabilities. 
+--I will separate my questions into two groups: just employees already slated for promotion, then all employees. 
+--I want to learn about the company's top employees, and then the company as a whole. Looking at the overall company can identify gaps in recognition or how proportional promotions are to various company characteristics.
 
 --PROMOTED SECTION
 --How many people were promoted?
@@ -19,12 +18,6 @@ FROM [Employee Data]
 WHERE is_promoted = 1; 
 
 -- 4668 total. How did we recruit these promoted employees? This will help us know where to focus our recruitment efforts. 
-SELECT recruitment_channel, 
-COUNT(*) AS number
-FROM [Employee Data]
-GROUP BY recruitment_channel
-ORDER BY number DESC;
-
 -- I want to see that as a percentage, for easier sharing. Going to use the "universal" way of calculating percentages. 
 WITH tbl1 AS (
 SELECT *
@@ -38,7 +31,7 @@ ROUND((COUNT(*) *100/(SELECT COUNT(*) FROM tbl1)),2)
 FROM tbl1
 GROUP By recruitment_channel
 ORDER BY percentage_of_channel DESC;
--- 55% are "other", an undefined type. The 42% is sourcing and 2% is referred. Seems proactively looking for potential employees is a good way to find high quality employees. 
+-- 55% are "other", an undefined type. The 42% is sourcing and 2% is referred. Seems proactively looking for potential employees (i.e. sourcing) is a good way to find high quality employees. 
 
 -- What level of education (college, grad school, neither) do promoted employees have? 
 SELECT ISNULL(education,'N/A') AS edu,COUNT(employee_id) AS num_employees
@@ -53,7 +46,8 @@ UPDATE [Employee Data]
 SET education = 'N/A'
 WHERE education IS NULL;
 
---Depending on the nature of the work (I assume Legal definitely requires a degree!), having a degree or not could prevent a promotion. Let's look at education degree by department.
+--Depending on the nature of the work (I assume Legal definitely requires a degree!), having a degree could affect a promotion. 
+--What level of education do promoted employees have?
 SELECT department, education,COUNT(employee_id) AS employee_amount
 FROM [Employee Data]
 WHERE is_promoted = 1
@@ -69,7 +63,6 @@ FROM [Employee Data]
 WHERE is_promoted = 1
 GROUP BY length_of_service
 ORDER BY COUNT(*) DESC;
-
 -- That is a huge range! I'm going to put in into groups. These names are easier to read than the full range (from 1 to 34 years!). 
 SELECT 
 COUNT(CASE WHEN length_of_service <= 5 THEN 1 END) AS 'Early',
@@ -100,9 +93,10 @@ SELECT length_of_service
 FROM [Employee Data]
 WHERE previous_year_rating IS NULL
 GROUP BY length_of_service;
---Yes it is. The rating is only ever NULL for people with one year of tenure, since don't have a "previous year" to reference. This is why I am not analyzing employees by just previous year rating.
+--Yes it is. The rating is only ever NULL for people with one year of tenure, since don't have a "previous year" to reference. That is why I did not judge promoted employees just by ratings or use only promoted employees with 5-star ratings.
 
---Before I ask questions about the departments, I want to see the size of each. This will help me set expectations. If a really big department only has 1 or 2 awards, then we need to reconsider their overall performance or how well we're recognizing their work.
+--Before I ask questions about the departments, I want to see the size of each. This will help me set expectations. 
+--If a really big department only has 1 or 2 awards, then the company may need to reconsider their overall performance or if they're properly recognizing their work.
 SELECT department,
 COUNT(*) AS size
 FROM dbo.[Employee Data]
