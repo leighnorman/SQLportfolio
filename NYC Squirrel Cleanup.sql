@@ -7,8 +7,9 @@
 SELECT DISTINCT(Unique_Squirrel_ID)
 FROM [2018 Central Park Squirrels]
 
---Generally, setting a primary key when importing data into SQL Server is much easier. 
---However, if for some reason I didn't want to do that from the outset, I can check for duplicate rows this way.
+--Generally, setting a primary key when importing data into SQL Server is much easier. MSSQL won't let you select any column as the primary key if it has any duplicates.
+--For me, it was easier to pop this relatively small dataset into Excel and fix it there. 
+--However, if I had a much larger dataset or needed to alter a table already in the database, I can check for duplicate rows this way.
 SELECT unique_squirrel_id,COUNT(*)
 FROM [2018 Central Park Squirrels]
 GROUP BY unique_squirrel_id
@@ -19,20 +20,20 @@ WITH CTE_Squirrel AS
 (SELECT *, ROW_NUMBER() OVER (PARTITION BY unique_squirrel_id ORDER BY unique_squirrel_id) AS Row_Num
 FROM [2018 Central Park Squirrels]
 )
-
---Checking if it worked...
-SELECT * FROM CTE_Squirrel
-ORDER BY Row_Num DESC
-
---Then deleting the duplicate records. 
 DELETE FROM CTE_Squirrel
 WHERE Row_Num > 1;
 
---Finally, checking if all the duplicates are gone. 
+--Finally, checking if all the duplicates are gone. If it worked, then this query shouldn't return anything. 
 SELECT COUNT(*),Unique_Squirrel_ID
 FROM [2018 Central Park Squirrels]
 GROUP BY Unique_Squirrel_ID
 HAVING COUNT(*) > 1;
+
+--To save myself a headache (and shaking down Google for answers), I'll add a primary key constraint so the same data doesn't get added more than once. 
+ALTER TABLE [2018 Central Park Squirrels]
+ADD CONSTRAINT PK_Unique_Squirrel_ID PRIMARY KEY (unique_squirrel_id);
+
+--This will be especially helpful to volunteers in the future. Now they can't make this unique squirrel ID error!
 
 --Now then, let's move on to the full dataset. 
 SELECT *
@@ -88,4 +89,3 @@ SET Above_Ground_Sighter_Measurement = 'N/A'
 WHERE Above_Ground_Sighter_Measurement IS NULL
 
 --Cleanup complete! 
-
