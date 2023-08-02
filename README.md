@@ -1,2 +1,2 @@
 # SQLportfolio
-This is my portfolio is show my SQL competence. I use SOQL (Salesforce's version of SQL) daily in my current position. Still, I wanted to test my original SQL skills. 
+This is my portfolio is show my SQL competence. I did two projects: an analysis of a company's top employees and a cleanup of the 2018 NYC Central Park Squirrel Census. Clearly, two super-related datasets. Anyways, I chose the HR dataset because it was relatively clean. I could some basic checks, then start querying. It's similar to my current position's database: well-maintained, so no need to do prep work. On the flip side, the squirrel dataset was a bit ratty. Since this was collected by volunteers (thank you!), I expected it to have some issues. 
